@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8' />
+    <title>Draw GeoJSON points</title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v1.3.1/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v1.3.1/mapbox-gl.css' rel='stylesheet' />
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <style>
+        body { margin:0; padding:0; }
+        #map { position:absolute; top:0; bottom:0; width:100%; }
+    </style>
+</head>
+<body>
+
+<div id='map'></div>
+<script>
+mapboxgl.accessToken = 'pk.eyJ1IjoidmVldiIsImEiOiIzdzVEVDdrIn0.z3N2X1Fk7rx4wXesVf0-rQ';
+var map = new mapboxgl.Map({
+    container: 'map',
+    style: 'mapbox://styles/mapbox/dark-v10',
+    center: [-96, 37.8],
+    zoom: 3
+});
+
+map.on('load', function () {
+
+    // load data with d3 (just my preference, load it another way if you prefer)
+    d3.json('Hudson_Counties_Trees.geojson').then(data => {
+      console.log(data)
+
+      map.addSource('treePlots', {
+          'type': 'geojson',
+          'data': data
+      });
+
+      map.addLayer({
+          'id': 'treePlotLayer',
+          'type': 'circle',
+          'source': 'treePlots',
+          'paint': {
+              'circle-radius': [
+                    'interpolate', ['linear'], ['zoom'],
+                    10, ['/', ['number', ['get', 'LIVE_TREES']], 10],
+                    13, ['/', ['number', ['get', 'LIVE_TREES']], 3],
+                ],
+              'circle-color': [
+                    'interpolate', ['linear'],
+                    ['get', 'LIVE_HEM_TREES'],
+                    0, '#fff',
+                    50, '#ff0000'
+              ]
+          }
+    });
+
+    });
+});
+</script>
+
+</body>
+</html>
